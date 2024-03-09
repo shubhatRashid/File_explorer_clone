@@ -1,7 +1,9 @@
 import React from "react"
 import { useState } from "react"
+import useTranversalMethods from "../hooks/useTranversalMethods"
 
 const Recursion = ({item,margin,allData,setAllData,index}) => {
+  const insertNode = useTranversalMethods()
   
   const [expand,setExpand] = useState(false)
   const [newEntry,setNewEntry] = useState(' ')
@@ -18,37 +20,15 @@ const Recursion = ({item,margin,allData,setAllData,index}) => {
         name : name
     })
   }
-  function dfs(items,parent,newData){
-    console.log(items)
-    items.forEach(element => {
-      if (element.name == parent){
-        element.items.push(
-          {
-            name:newEntry,
-            id : 100000,
-            isfolder: showInput.type =='file'? false: true,
-            items : showInput.type == 'folder'? [] : null
-          }
-        )
-        setAllData(newData)
-        setShowInput({...showInput,visibility:false})
-        return
-      }else{
-        if (element.isfolder){
-          dfs(element.items,parent,newData)
-        }else{
-          return
-        }
-      }
-    }); 
-  }
   
   const handleSubmit = (e) => {
     e.preventDefault()
     let type = showInput.type
     let newData = JSON.parse(JSON.stringify(allData))
     let parent = showInput.name
-    dfs(newData,parent,newData)
+    insertNode(newData,parent,newEntry,showInput.type)
+    setAllData(newData)
+    setShowInput({...showInput,visibility:false})
   }
   
   return (
