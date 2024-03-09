@@ -1,24 +1,56 @@
 import React from "react"
 import { useState } from "react"
 
-const Recursion = ({item,margin}) => {
+const Recursion = ({item,margin,allData,setAllData,index}) => {
+  
   const [expand,setExpand] = useState(false)
-  const [newEntry,setNewEntry] = useState('')
-  const [showInput,setShowInput] = useState(false)
-  const addFolder = (id) => {
-    setShowInput(!showInput)
+  const [newEntry,setNewEntry] = useState(' ')
+  const [showInput,setShowInput] = useState({
+    visibility:false,
+    type:'folder',
+    name: ""
+  })
+  
+  const showInputDiv = (type,name) => {
+    setShowInput({
+        visibility:!showInput.visibility,
+        type:type,
+        name : name
+    })
   }
-  const addFile = (array,id) => {
-    setShowInput(!showInput)
+  function dfs(items,parent,newData){
+    console.log(items)
+    items.forEach(element => {
+      if (element.name == parent){
+        element.items.push(
+          {
+            name:newEntry,
+            id : 100000,
+            isfolder: showInput.type =='file'? false: true,
+            items : showInput.type == 'folder'? [] : null
+          }
+        )
+        setAllData(newData)
+        setShowInput({...showInput,visibility:false})
+        return
+      }else{
+        if (element.isfolder){
+          dfs(element.items,parent,newData)
+        }else{
+          return
+        }
+      }
+    }); 
   }
-
-  const handleClick = (array,id) => {
-    setExpand(!expand)
-  }
-
+  
   const handleSubmit = (e) => {
-    
+    e.preventDefault()
+    let type = showInput.type
+    let newData = JSON.parse(JSON.stringify(allData))
+    let parent = showInput.name
+    dfs(newData,parent,newData)
   }
+  
   return (
   <div style={{display:"flex",flexDirection:"column",margin:margin,gap:"15px"}} >
   { item.isfolder ? 
@@ -33,14 +65,22 @@ const Recursion = ({item,margin}) => {
                     width:'400px',
                     height:'50px'}}
         >
-            <h3 onClick={() =>handleClick(item.name)}>📂{item.name}</h3>
+            <h3 onClick={() => setExpand(!expand)}>📂{item.name}</h3>
             <div style={{position:"absolute" ,right:0,display:'flex',gap:5}}>
-                <button onClick={() => addFile(item.id)} style={{zIndex:2}}>+ file</button>
-                <button onClick={()=> addFolder(item.id)}>+ folder</button>
+                <button onClick={() => showInputDiv('file',item.name)} style={{zIndex:2}}>+ file</button>
+                <button onClick={()=> showInputDiv('folder',item.name)}>+ folder</button>
             </div>   
         </div>
-        <form type="submit" onSubmit={handleSubmit} style={{display:showInput?'block':'none'}}>
-            <input type="text" onChange={(e) => setNewEntry(e.target.value)} value={newEntry}/>
+        <form type="submit" onSubmit={handleSubmit} 
+            style={{display:showInput.visibility?'flex':'none',height:'20px',justifyContent:'start',alignItems:'center',margin:margin}}
+        >
+            <p>{showInput.type=='folder'?'📂':'📄'}</p>
+            <input 
+            autoFocus
+            type="text" 
+            onBlur={()=> setShowInput({...showInput,visibility:false})} 
+            onChange={(e) => setNewEntry(e.target.value)} value={newEntry} 
+            />
         </form>
     </div>
     : <p>📄{item.name}</p>
@@ -51,7 +91,7 @@ const Recursion = ({item,margin}) => {
             item.items.map((i,index) => 
             item.isfolder && item.items.length >0
             ?
-            <Recursion item = {i} key={index} margin={index+2*10 +"px"}/>
+            <Recursion item = {i} key={index} index = {index} allData={allData} setAllData={setAllData} margin={index+2*10 +"px"}/>
             :
             <h1 key={index}>{i.name}</h1>
             )

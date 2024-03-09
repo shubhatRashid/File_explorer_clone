@@ -31,7 +31,12 @@ const folderData = [{
                     isfolder:false
                 }
             ]
-        }
+        },
+        {
+            name: "file_04",
+            id: 6,
+            isfolder:false,
+        },
     ]
 }]
 
