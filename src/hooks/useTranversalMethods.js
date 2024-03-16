@@ -28,9 +28,7 @@ const useTranversalMethods = () => {
       
       items.forEach(element => {
         if (element.name == deleteItemParent){
-          console.log(element.items)
           element.items = element.items.filter(item => item.name != deleteItem)
-          console.log(element.items)
           return 
         }else{
           if (element.isfolder){
@@ -41,6 +39,32 @@ const useTranversalMethods = () => {
         }
       }); 
       }
-    return {insertNode,deleteNode}
+
+      function renameNode(items,renameParent,renameItem,newName)
+    {   
+      
+      items.forEach(element => {
+        if (element.name == renameParent){
+          
+          element.items = element.items.map(item => {
+            if (item.name == renameItem){
+              item.name = newName
+              return item
+            }else{
+              return item
+            }
+          })
+
+          return 
+        }else{
+          if (element.isfolder){
+            renameNode(element.items,renameParent,renameItem,newName)
+          }else{
+            return
+          }
+        }
+      }); 
+      }
+    return {insertNode,deleteNode,renameNode}
 }
 export default useTranversalMethods

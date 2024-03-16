@@ -3,8 +3,10 @@ import { useState } from "react"
 import useTranversalMethods from "../hooks/useTranversalMethods"
 
 const Recursion = ({item,parent,margin,allData,setAllData,index}) => {
-  const {insertNode,deleteNode} = useTranversalMethods()
-  
+  const {insertNode,deleteNode,renameNode} = useTranversalMethods()
+
+  const [changeName,setChangeName] = useState(false)
+  const [newName,setNewName] = useState('')
   const [expand,setExpand] = useState(false)
   const [newEntry,setNewEntry] = useState(' ')
   const [showInput,setShowInput] = useState({
@@ -38,6 +40,14 @@ const Recursion = ({item,parent,margin,allData,setAllData,index}) => {
     
   }
 
+  const handleRename=(e,parent,renameItem,newName) => {
+    e.preventDefault()
+    let newData = JSON.parse(JSON.stringify(allData)) // copy of original data which we will modify
+    renameNode(newData,parent,renameItem,newName)
+    setAllData(newData)
+    setChangeName(false)
+  }
+
   return (
   <div style={{display:"flex",flexDirection:"column",margin:margin,gap:10,width:'700px'}} >
   { item.isfolder ? 
@@ -52,11 +62,22 @@ const Recursion = ({item,parent,margin,allData,setAllData,index}) => {
                     width:'100%',
                     height:'50px'}}
         >
-            <h3 onClick={() => setExpand(!expand)}>📂{item.name}</h3>
+          { changeName
+          ? 
+          <div style={{display:"flex",gap:5,height:'20px',alignItems:'center'}}>
+            <h3>📂</h3>
+            <form type='submit' onSubmit={(e)=>handleRename(e,parent,item.name,newName)}>
+              <input value={newName} placeholder={item.name} onChange={(e)=> setNewName(e.target.value)} autoFocus onBlur={() => setChangeName(false)}/>
+            </form>
+          </div>
+          :
+          <h3 onClick={() => setExpand(!expand)}>📂{item.name}</h3>
+           }
             <div style={{position:"absolute" ,right:0,display:'flex',gap:5}}>
                 <button onClick={() => showInputDiv('file',item.name)} style={{zIndex:2}}>+ 📄</button>
                 <button onClick={()=> showInputDiv('folder',item.name)}>+ 📂</button>
                 <button onClick={() => handleDeleteContent(parent,item.name)} >- 📂</button>
+                <button onClick={() => setChangeName(!changeName)} >📝</button>
             </div>   
         </div>
         <form type="submit" onSubmit={handleSubmit} 
@@ -73,9 +94,18 @@ const Recursion = ({item,parent,margin,allData,setAllData,index}) => {
     </div>
     : 
     <div style={{display:'flex',width:'100%',justifyContent:'space-between'}}>
-      <p>📄{item.name}</p>
-      <button onClick={() => handleDeleteContent(parent,item.name)}>- 📄</button>
-    </div>
+      
+      {changeName ? 
+        <form type='submit' onSubmit={(e)=>handleRename(e,parent,item.name,newName)}>
+          <input value={newName} placeholder={item.name} onChange={(e)=> setNewName(e.target.value)} autoFocus onBlur={() => setChangeName(false)}/>
+        </form>
+       :<p>📄{item.name}</p>
+      }
+      <div style={{display:'flex',gap:10}}>
+        <button onClick={() => handleDeleteContent(parent,item.name)}>- 📄</button>
+        <button onClick={() => setChangeName(!changeName)} >📝</button>
+      </div>
+      </div>
   }
     { item.isfolder && item.items.length >0 &&
         <div style={{display:expand?'block':'none'}}>
