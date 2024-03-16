@@ -4,7 +4,7 @@ const useTranversalMethods = () => {
     {
         items.forEach(element => {
           if (element.name == parent){
-            element.items.push(
+            element.items.unshift(
               {
                 name:newEntry,
                 id : 100000,
@@ -22,6 +22,25 @@ const useTranversalMethods = () => {
           }
         }); 
       }
-    return insertNode
+
+    function deleteNode(items,deleteItemParent,deleteItem)
+    {   
+      
+      items.forEach(element => {
+        if (element.name == deleteItemParent){
+          console.log(element.items)
+          element.items = element.items.filter(item => item.name != deleteItem)
+          console.log(element.items)
+          return 
+        }else{
+          if (element.isfolder){
+            deleteNode(element.items,deleteItemParent,deleteItem)
+          }else{
+            return
+          }
+        }
+      }); 
+      }
+    return {insertNode,deleteNode}
 }
 export default useTranversalMethods

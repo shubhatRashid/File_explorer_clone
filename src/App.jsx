@@ -7,7 +7,7 @@ function App() {
   return (
     <div style={{display:'flex',flexDirection:'column'}}>
           <h1>Explorer</h1>
-          <Recursion item={data[0]} index={0} margin = "10px" allData = {data} setAllData={setData}/>
+          <Recursion item={data[0]} parent={data[0]} index={0} margin = "10px" allData = {data} setAllData={setData}/>
     </div>
   )
 }

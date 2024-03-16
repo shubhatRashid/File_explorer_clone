@@ -2,8 +2,8 @@ import React from "react"
 import { useState } from "react"
 import useTranversalMethods from "../hooks/useTranversalMethods"
 
-const Recursion = ({item,margin,allData,setAllData,index}) => {
-  const insertNode = useTranversalMethods()
+const Recursion = ({item,parent,margin,allData,setAllData,index}) => {
+  const {insertNode,deleteNode} = useTranversalMethods()
   
   const [expand,setExpand] = useState(false)
   const [newEntry,setNewEntry] = useState(' ')
@@ -24,15 +24,22 @@ const Recursion = ({item,margin,allData,setAllData,index}) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     let type = showInput.type
-    let newData = JSON.parse(JSON.stringify(allData))
     let parent = showInput.name
-    insertNode(newData,parent,newEntry,showInput.type)
+    let newData = JSON.parse(JSON.stringify(allData)) // copy of original data which we will modify
+    insertNode(newData,parent,newEntry,type)
     setAllData(newData)
     setShowInput({...showInput,visibility:false})
   }
-  
+
+  const handleDeleteContent = (deleteItemParent,deleteItem) => {
+    let newData = JSON.parse(JSON.stringify(allData)) // copy of original data which we will modify
+    deleteNode(newData,deleteItemParent,deleteItem)
+    setAllData(newData)
+    
+  }
+
   return (
-  <div style={{display:"flex",flexDirection:"column",margin:margin,gap:"15px"}} >
+  <div style={{display:"flex",flexDirection:"column",margin:margin,gap:10,width:'700px'}} >
   { item.isfolder ? 
     <div>
         <div 
@@ -42,13 +49,14 @@ const Recursion = ({item,margin,allData,setAllData,index}) => {
                     flexDirection:"row",
                     justifyContent:'space-between',
                     alignItems:"center",
-                    width:'400px',
+                    width:'100%',
                     height:'50px'}}
         >
             <h3 onClick={() => setExpand(!expand)}>📂{item.name}</h3>
             <div style={{position:"absolute" ,right:0,display:'flex',gap:5}}>
-                <button onClick={() => showInputDiv('file',item.name)} style={{zIndex:2}}>+ file</button>
-                <button onClick={()=> showInputDiv('folder',item.name)}>+ folder</button>
+                <button onClick={() => showInputDiv('file',item.name)} style={{zIndex:2}}>+ 📄</button>
+                <button onClick={()=> showInputDiv('folder',item.name)}>+ 📂</button>
+                <button onClick={() => handleDeleteContent(parent,item.name)} >- 📂</button>
             </div>   
         </div>
         <form type="submit" onSubmit={handleSubmit} 
@@ -63,7 +71,11 @@ const Recursion = ({item,margin,allData,setAllData,index}) => {
             />
         </form>
     </div>
-    : <p>📄{item.name}</p>
+    : 
+    <div style={{display:'flex',width:'100%',justifyContent:'space-between'}}>
+      <p>📄{item.name}</p>
+      <button onClick={() => handleDeleteContent(parent,item.name)}>- 📄</button>
+    </div>
   }
     { item.isfolder && item.items.length >0 &&
         <div style={{display:expand?'block':'none'}}>
@@ -71,7 +83,7 @@ const Recursion = ({item,margin,allData,setAllData,index}) => {
             item.items.map((i,index) => 
             item.isfolder && item.items.length >0
             ?
-            <Recursion item = {i} key={index} index = {index} allData={allData} setAllData={setAllData} margin={index+2*10 +"px"}/>
+            <Recursion item = {i} parent = {item.name} key={index} index = {index} allData={allData} setAllData={setAllData} margin={index+2*10 +"px"}/>
             :
             <h1 key={index}>{i.name}</h1>
             )
